@@ -23,13 +23,36 @@ app.route('/api/users/:id')
    const user = users.find(user=>(user.id === id))
    return res.json(user);
 }).patch((req,res)=>{
-    return res.json({status:"Pending"})
+    const id = Number(req.params.id);
+    const user = users.find(user => user.id === id);
+
+    if (!user) {
+        return res.status(404).json({ status: "error", message: "User not found" });
+    }
+
+    // Update only the fields provided in the request body
+    Object.assign(user, req.body);
+
+}).delete((req,res)=>{
+    const id = Number(req.params.id);
+    const user = users.findIndex(user => user.id === id)
+    if (user === -1) {
+        return res.status(404).json({ status: "error", message: "User not found" });
+    }
+    users.splice(user, 1);
+    res.status(200).json({status:"success"});
 })
 app.post("/api/users",(req,res)=>{
     const body = req.body;
     users.push({...body ,id: users.length+1})
-    fs.writeFile('./MOCK_DATA.json',JSON.stringify(users),(err ,data)=>{
-        return res.json({status:"success",id: users.length });
-    })   
+    // fs.writeFile('./MOCK_DATA.json',JSON.stringify(users),(err ,data)=>{
+    //     return res.json({status:"success",id: users.length });
+    // })   
+    fs.writeFile('./MOCK_DATA.json', JSON.stringify(users), (err, data) => {
+        if (err) {
+            return res.status(500).json({ status: "error", message: "Error writing to file" });
+        } 
+        return res.json({ status: "success", message: "User deleted successfully" });
+    });
 })
 app.listen(PORT,() =>console.log(`Server Started at PORT:${PORT}`))

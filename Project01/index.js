@@ -1,6 +1,7 @@
 const express = require("express")
 const fs = require("fs")
-const users = require('./MOCK_DATA.json')
+const users = require('./MOCK_DATA.json');
+const { error } = require("console");
 const app = express();
 const PORT = 8000;
 
@@ -18,7 +19,10 @@ app.use((req,res ,next)=>{
 
 //Routes
 app.get('/api/users',(req,res)=>{
-    console.log("I am in get route",req.myUserName)
+    res.setHeader("X-My-Name", "Harshit Joshi")
+    // Always Add X in custom headers
+    console.log(req.headers)
+    // console.log("I am in get route",req.myUserName)
     return res.json(users);
 })
 app.get('/users',(req,res)=>{
@@ -32,6 +36,7 @@ app.route('/api/users/:id')
 .get((req,res)=>{
    const id = Number(req.params.id);
    const user = users.find(user=>(user.id === id))
+   if(!user) return res.status(404).json({error:"User Not Found"})
    return res.json(user);
 }).patch((req,res)=>{
     const id = Number(req.params.id);
@@ -55,6 +60,10 @@ app.route('/api/users/:id')
 })
 app.post("/api/users",(req,res)=>{
     const body = req.body;
+    if(!body || !body.first_name || !body.email || !body.gender || !body.last_name ||!body.job_title)
+    {
+        return res.status(400).json({msg:"All Feilds Are Required"})
+    }
     users.push({...body ,id: users.length+1})
     // fs.writeFile('./MOCK_DATA.json',JSON.stringify(users),(err ,data)=>{
     //     return res.json({status:"success",id: users.length });

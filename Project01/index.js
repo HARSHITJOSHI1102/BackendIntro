@@ -6,8 +6,19 @@ const PORT = 8000;
 
 
 app.use(express.urlencoded({extended:false}));
+
+
+// Middleware are used as a plugin to carry out the request
+app.use((req,res ,next)=>{
+  fs.appendFile('log.txt',`${Date.now()}:${req.method}:${req.path}\n`,(err,data)=>{
+    next();
+  })
+})
+
+
 //Routes
 app.get('/api/users',(req,res)=>{
+    console.log("I am in get route",req.myUserName)
     return res.json(users);
 })
 app.get('/users',(req,res)=>{
